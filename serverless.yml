@@ -25,12 +25,33 @@ resources:
     AuctionsTable: ${file(infrastructure/resources/AuctionsTable.yml):AuctionsTable}
 
 functions:
-  auction:
-    handler: src/handlers/createAuction.handler
+  createAuctions:
+    handler: src/handlers/createAuctions.handler
     events:
       - http:
           method: POST
-          path: auction
+          path: auctions
+
+  getAuctions:
+    handler: src/handlers/getAuctions.handler
+    events:
+      - http:
+          method: GET
+          path: auctions
+
+  getAuction:
+    handler: src/handlers/getAuction.handler
+    events:
+      - http:
+          method: GET
+          path: auctions/{id}
+
+  placeBid:
+    handler: src/handlers/placeBid.handler
+    events:
+      - http:
+          method: PATCH
+          path: auctions/{id}/bid
 
 custom:
   AuctionsTable:
