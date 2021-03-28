@@ -15,10 +15,12 @@ provider:
     shouldStartNameWithService: true
   environment:
     AUCTIONS_TABLE_NAME: ${self:custom.AuctionsTable.name}
+    AUCTIONS_MAIL_QUEUE_URL: ${self:custom.MailQueue.url}
   iam:
     role:
       statements:
         - ${file(infrastructure/iam/AuctionsTableIAM.yml):AuctionsTableIAM}
+        - ${file(infrastructure/iam/MailQueueIAM.yml):MailQueueIAM}
 
 resources:
   Resources:
@@ -71,5 +73,8 @@ custom:
   AuctionsTable:
     name: !Ref AuctionsTable
     arn: !GetAtt AuctionsTable.Arn
+  MailQueue:
+    arn: ${cf:auctions-notification-service-${self:provider.stage}.MailQueueArn}
+    url: ${cf:auctions-notification-service-${self:provider.stage}.MailQueueUrl}
   bundle:
     linting: false
