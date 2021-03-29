@@ -16,15 +16,19 @@ provider:
   environment:
     AUCTIONS_TABLE_NAME: ${self:custom.AuctionsTable.name}
     AUCTIONS_MAIL_QUEUE_URL: ${self:custom.MailQueue.url}
+    AUCTIONS_BUCKET_NAME: ${self:custom.AuctionsBucket.name}
   iam:
     role:
       statements:
         - ${file(infrastructure/iam/AuctionsTableIAM.yml):AuctionsTableIAM}
         - ${file(infrastructure/iam/MailQueueIAM.yml):MailQueueIAM}
+        - ${file(infrastructure/iam/AuctionsBucketIAM.yml):AuctionsBucketIAM}
 
 resources:
   Resources:
     AuctionsTable: ${file(infrastructure/resources/AuctionsTable.yml):AuctionsTable}
+    AuctionsBucket: ${file(infrastructure/resources/AuctionsBucket.yml):AuctionsBucket}
+    AuctionsBucketPolicy: ${file(infrastructure/resources/AuctionsBucket.yml):AuctionsBucketPolicy}
 
 functions:
   createAuctions:
@@ -63,6 +67,15 @@ functions:
           cors: true
           authorizer: ${self:custom.authorizer}
 
+  uploadPicture:
+    handler: src/handlers/uploadAuctionPicture.handler
+    events:
+      - http:
+          method: PATCH
+          path: auctions/{id}/picture
+          cors: true
+          authorizer: ${self:custom.authorizer}
+
   processAuctions:
     handler: src/handlers/processAuctions.handler
     # events:
@@ -76,5 +89,7 @@ custom:
   MailQueue:
     arn: ${cf:auctions-notification-service-${self:provider.stage}.MailQueueArn}
     url: ${cf:auctions-notification-service-${self:provider.stage}.MailQueueUrl}
+  AuctionsBucket:
+    name: ${self:service}-auctions-picture-${self:provider.stage}
   bundle:
     linting: false
